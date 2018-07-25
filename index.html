@@ -1,0 +1,39 @@
+<html>
+<head>
+<style>
+.grecaptcha-badge {display: none;}
+</style>
+<script>
+  function onSubmit(token) {
+    console.log(token);
+    console.log('OK!');
+    
+    grecaptcha.reset();
+  }
+
+  function validate(event) {
+        event.preventDefault();
+        grecaptcha.execute();
+  }
+
+  function onload() {
+    var element = document.getElementById('submitId');
+    element.onclick = validate;
+  }
+</script>
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+   <form>
+     <div>Id: <input type="text"/></div>
+     <div>Full name: <input type="text"/></div>
+     <div>Age: <input type="text"/></div>
+     <div id='recaptcha' class="g-recaptcha"
+          data-sitekey="6LfQQGYUAAAAAO8vYBMh9Ptc11PpPw2zR_rtDh2A"
+          data-callback="onSubmit"
+          data-size="invisible" data-badge="inline"></div>
+     <button id='submitId'>submit</button>
+   </form>
+<script>onload();</script>
+</body>
+</html>
