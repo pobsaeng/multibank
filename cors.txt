@@ -1,22 +1,235 @@
-// var title = prompt('Event Title:');
-            // var eventData;
-            // if (title) {
-            //     eventData = {
-            //         title: title,
-            //         start: moment("2018-08-23 01:30").format('YYYY/MM/DD HH:mm'),
-            //         end: moment("2018-08-26 4:30").format('YYYY/MM/DD HH:mm'),
-            //         //Optional
-            //         allDay: false,
-            //         //url: "http://google.com",
-            //         className: "test-class",
-            //         editable: true,
-            //         color: "yellow",
-            //         borderColor: "red",
-            //         backgroundColor: "yellow",
-            //         textColor: "green",
-            //         fromSelect: true
-            //     };
-            //     console.log(start);
-            //     $('#calendar').fullCalendar('renderEvent', eventData, true);
-            // }
-            // $('#calendar').fullCalendar('unselect');
+<template>
+<div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="modal fade" tabindex="-1" role="dialog" id="add-event-modal">
+          <div class="modal-dialog">
+              <div class="modal-content">
+                  <div class="box-header with-border">
+                      <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true" @click="closeModal">×</span><span class="sr-only">close</span></button>
+                      <h4 class="modal-title">Add a Holiday</h4>
+                  </div>
+                  <div class="modal-body">
+                    <input ref="txtAdd" type="text" class="form-control" placeholder="Enter name"/>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="closeModal">Close</button>
+                    <button type="button" class="btn btn-warning" @click="onSave" data-dismiss="modal">Save</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <div id="fullCalModal" class="modal fade">
+          <div class="modal-dialog">
+              <div class="modal-content">
+                  <div class="box-header with-border">
+                      <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true" @click="closeModal">×</span><span class="sr-only" @click="closeModal">close</span></button>
+                      <h4 class="modal-title">Delete Holiday</h4>
+                  </div>
+                  <div id="modalBody" class="modal-body">
+                    <div>Are you sure you want to remove this item?</div>
+                      <div>Holiday: <span id="title"></span></div>
+                  </div>
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-default" @click="closeModal" data-dismiss="modal">No</button>
+                      <button class="btn btn-danger" @click="onDelete">Yes</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+      </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <span id="calendar"></span>
+    </div>
+  </div>
+</div>
+</template>
+
+<script>
+import $ from "jquery";
+import moment from "moment";
+
+export default {
+  name: "hello",
+  data() {
+    return {
+      selfEL: {},
+      modalStatus: false,
+      dateClicked: ''
+    };
+  },
+  mounted() {
+    var me = this;
+    this.selfEL = $(me.$el);
+
+    me.$on("modalStatus", function(bool) {
+      me.modalStatus = bool;
+    });
+
+    me.$on("dateDayClicked", function(date) {
+      me.dateClicked = date;
+      console.log(me.dateClicked.format("YYYY-MM-DD"));
+    });
+
+    me.$nextTick(function() {
+      me.createButtonEL();
+    });
+
+    me.createCalendar();
+  },
+  methods: {
+    createCalendar() {
+      var me = this;
+      var args = {
+        header: {
+          left: "prev,next today",
+          center: "title",
+          right: ""
+          // right: "month,agendaWeek,agendaDay"
+        },
+        locale: "th",
+        displayEventTime: false,
+        defaultView: "month",
+        editable: false,
+        droppable: false,
+        events(start, end, timezone, callback) {
+          callback([
+            {
+              title: "Hotmail",
+              start: moment().add(2),
+              end: moment().add(2)
+            }
+          ]);
+        },
+        dayClick:function(date, allDay, jsEvent, view ) {
+           me.$emit("dateDayClicked", date);
+        },
+        dayRender: function(date, element, view){
+           console.log("dayRender!");
+        },
+        eventClick: function(calEvent, jsEvent, view) {
+          var data = calEvent.start.format("YYYY-MM-DD");
+          var dia = calEvent.start.format("dddd");
+          console.log(data, dia);
+
+          $('#calendar').fullCalendar('removeEvents', calEvent._id, true);
+        },
+        // eventRender: function(event, element) {
+        //   element.append( "<span class='removebtn'>X</span>" );
+        //   element.find(".removebtn").click(function() {
+        //     $('#calendar').fullCalendar('removeEvents',event._id);
+        //   });
+        // },
+        eventRender: function(event, element) {
+          console.log("eventRender!");
+          //This task is do while runtime
+
+          // element.append("<span class='removebtn'>X</span>");
+
+
+          var divClose = document.createElement("SPAN");
+          divClose.classList = "close";
+          divClose.textContent = "x";
+          element.find(".fc-title")[0].appendChild(divClose);
+
+
+            element.find(".close").click(function() {
+              // me.selfEL.fullCalendar('removeEventSources');
+              me.selfEL.fullCalendar('removeEvents',event._id);
+          });
+
+          element.bind("dblclick", function(e) {
+            me.$emit("modalStatus", true);
+
+            $("#title").html(event.title);
+            // $("#startTime").html(moment(event.start).format("MMM Do h:mm A"));
+            // $("#endTime").html(moment(event.end).format("MMM Do h:mm A"));
+            // $("#eventInfo").html(event.description);
+            // $("#eventLink").attr("href", event.url);
+            $("#fullCalModal").modal({backdrop: 'static', keyboard: false});
+          });
+        }
+      };
+
+      this.selfEL.on("dblclick", function(event) {
+        var now = moment(event.timeStamp).format("DD-MM-YYYY HH:mm:ss");
+
+        const date = new Date(event.timeStamp).toDateString();
+        var s = new Date(event.timeStamp).toLocaleDateString("en-US")
+        console.log(s);
+        console.log( now);
+
+        event.preventDefault();
+        if (!me.modalStatus) {
+          $("#add-event-modal").modal({backdrop: 'static', keyboard: false});
+        }
+      });
+
+      // this.selfEL.on("contextmenu", function(e) {
+      //   e.preventDefault();
+      //   if (e.button == 2) {
+      //   }
+      // });
+
+      this.selfEL.fullCalendar(args);
+    },
+    createButtonEL() {
+      var divCreate = document.createElement("DIV");
+      var btnCreate = document.createElement("BUTTON");
+      btnCreate.setAttribute("data-toggle", "modal");
+      // btnCreate.setAttribute("data-target", "#add-event-modal");
+      btnCreate.classList = "btn btn-warning";
+      btnCreate.textContent = "Create New";
+      btnCreate.addEventListener("click", function(e) {
+        $("#add-event-modal").modal({backdrop: 'static', keyboard: false});
+      });
+      divCreate.appendChild(btnCreate);
+      document.getElementsByClassName("fc-right")[0].appendChild(divCreate);
+    },
+    onSave(e) {
+      // var date = new Date();
+      const eventName = this.$refs.txtAdd.value;
+      if(eventName){
+        const eventData = {
+          title: eventName,
+          start: moment(new Date()).format('YYYY/MM/DD HH:mm')
+      };
+      this.selfEL.fullCalendar('renderEvent', eventData, true);
+      }
+      this.selfEL.fullCalendar('unselect');
+
+    },
+    onDelete(){
+      alert("Delete");
+    },
+    closeModal() {
+      this.$emit("modalStatus", false);
+    }
+  },
+  components: {}
+};
+</script>
+
+<style scoped>
+.modal-header {
+  border-bottom: 1px solid #ccc;
+}
+.modal-body {
+  overflow-y: auto;
+}
+.close {
+  position: absolute;
+  float: right;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  color: red;
+  text-shadow: 0 1px 0 red !important;
+  opacity: 5;
+}
+
+
+</style>
