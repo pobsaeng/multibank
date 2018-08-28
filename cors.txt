@@ -1,248 +1,177 @@
 <template>
-<div class="row">
-  <div class="col-md-12">
-    <div class="form-group">
-      <button type="button" class="btn btn-info" data-toggle="modal"
-              data-target="#add-event-modal">
-        Create New
-      </button>
-    </div>
-
-    <div class="modal fade" tabindex="-1" role="dialog" id="add-event-modal">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">close</span></button>
-                    <h4 class="modal-title">Add a Holiday</h4>
-                </div>
-                 <div class="modal-body">
-                  <div class="form-group">
-                    <input type="text" class="form-control" placeholder="Enter name"/>
+<div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="modal fade" tabindex="-1" role="dialog" id="add-event-modal">
+          <div class="modal-dialog">
+              <div class="modal-content">
+                  <div class="box-header with-border">
+                      <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true" @click="closeModal">×</span><span class="sr-only">close</span></button>
+                      <h4 class="modal-title">Add a Holiday</h4>
                   </div>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-warning" data-dismiss="modal">Save</button>
-                </div>
-            </div>
-        </div>
+                  <div class="modal-body">
+                    <input ref="txtAdd" type="text" class="form-control" placeholder="Enter name"/>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="closeModal">Close</button>
+                    <button type="button" class="btn btn-warning" @click="onSave" data-dismiss="modal">Save</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <div id="fullCalModal" class="modal fade">
+          <div class="modal-dialog">
+              <div class="modal-content">
+                  <div class="box-header with-border">
+                      <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true" @click="closeModal">×</span><span class="sr-only" @click="closeModal">close</span></button>
+                      <h4 id="modalTitle" class="modal-title"><span id="title"></span></h4>
+                  </div>
+                  <div id="modalBody" class="modal-body">
+                      เวลาที่เริ่ม: <span id="startTime"></span><br>
+                      เวลาที่สิ้นสุด: <span id="endTime"></span><br><br>
+                      <p id="eventInfo"></p>
+                  </div>
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-default" @click="closeModal" data-dismiss="modal">Close</button>
+                      <button class="btn btn-primary">Event Page</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+      </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <span id="calendar"></span>
     </div>
-
-    <div id="fullCalModal" class="modal fade">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
-                    <h4 id="modalTitle" class="modal-title"><span id="title"></span></h4>
-                </div>
-                <div id="modalBody" class="modal-body">
-                    เวลาที่เริ่ม: <span id="startTime"></span><br>
-                    เวลาที่สิ้นสุด: <span id="endTime"></span><br><br>
-                    <p id="eventInfo"></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button class="btn btn-primary">Event Page</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <full-calendar
-      ref="calendar"
-      id="calendar"
-      :config="config" 
-      :events="events"/>
-
-
-    <vue-simple-context-menu
-      :options="options"
-      ref="vueSimpleContextMenu"
-      @optionClicked="optionClicked">
-    </vue-simple-context-menu>
-
   </div>
 </div>
 </template>
 
 <script>
-import $ from 'jquery'
-import { VueContext } from "vue-context";
+import $ from "jquery";
 import moment from "moment";
 
 export default {
   name: "hello",
   data() {
     return {
-      options: [
-        {
-          name: "Delete",
-          slug: "delete"
-        }
-      ],
-      events: [],
-      config: {
+      selfEL: {},
+      inputField: [],
+      modalStatus: false
+    };
+  },
+  mounted() {
+    var me = this;
+    this.selfEL = $(me.$el);
+
+    me.$on("modalStatus", function(bool) {
+      me.modalStatus = bool;
+    });
+
+    me.$nextTick(function() {
+      me.createButtonEL();
+    });
+
+    me.createCalendar();
+  },
+  methods: {
+    createCalendar() {
+      var me = this;
+
+      var args = {
+        header: {
+          left: "prev,next today",
+          center: "title",
+          right: ""
+          // right: "month,agendaWeek,agendaDay"
+        },
         locale: "th",
+        displayEventTime: false,
         defaultView: "month",
-        editable  : true,
-        droppable : true,
+        editable: false,
+        droppable: false,
         events(start, end, timezone, callback) {
-          // self.$http.get(`/myFeed`, {timezone: timezone}).then(response => {
-          //   callback(response.data.data)
-          // })
-
           callback([
-				{
-					title: 'Long Event',
-					 start: '2015-10-10 12:30:00',
-          end: '2015-10-10 16:30:00'
-				},
-				{
-					title: 'Click for Google',
-					// url: 'http://google.com/',
-          start: moment().add(4),
-          end: moment()
-                .add(2, "d")
+            {
+              title: "Hotmail",
+              start: moment().add(2),
+              end: moment().add(2)
             }
-          ])
+          ]);
         },
-
-        dayClick:function( date, allDay, jsEvent, view ) {
-          console.log("date: " + date);
-        },
-        dayRender: function(date, element, view){
-           console.log("dayRender!");
+        dayClick(date, event, view) {},
+        eventClick: function(event, jsEvent, view) {
+          var data = event.start.format("YYYY-MM-DD");
+          var dia = event.start.format("dddd");
+          console.log(data, dia);
         },
         eventRender: function(event, element) {
-          const me = this;
           console.log("eventRender!");
           var data = event.start.format("YYYY-MM-DD");
           var dia = event.start.format("dddd");
           console.log(data, dia);
 
-          
-          $(element).tooltip({title: event.title, start: data, end: dia});
-    
-          element.bind('dblclick', function(eventE, jsEvent, view) {
-            $(this).css('border-color', 'red');
-            $(this).css('background-color', 'black');
+          element.bind("dblclick", function(eventE, jsEvent, view) {
+            me.$emit("modalStatus", true);
 
             $("#title").html(event.title);
-            $("#startTime").html(moment(event.start).format('MMM Do h:mm A'));
-            $("#endTime").html(moment(event.end).format('MMM Do h:mm A'));
+            $("#startTime").html(moment(event.start).format("MMM Do h:mm A"));
+            $("#endTime").html(moment(event.end).format("MMM Do h:mm A"));
             $("#eventInfo").html(event.description);
-            $("#eventLink").attr('href',event.url);
-            $('#fullCalModal').modal();
-            
+            $("#eventLink").attr("href", event.url);
+            $("#fullCalModal").modal({backdrop: 'static', keyboard: false});
           });
-
-          element.contextmenu(function(e) {
-            var menu = document.getElementById("vue-simple-context-menu")
-            if (!menu) {
-                return
-            }
-
-            if(!this.menuWidth || !this.menuHeight) {
-                menu.style.visibility = "hidden"
-                menu.style.display = "block"
-                this.menuWidth = menu.offsetWidth
-                this.menuHeight = menu.offsetHeight
-                menu.removeAttribute("style")
-            }
-            var left = e.pageX - 250, top = e.pageY - 50;
-            menu.style.left = left + "px";
-            menu.style.top = top + "px";
-            menu.position = "fixed";
-            menu.classList.add("dropdown-menu");
-            menu.classList.add('vue-simple-context-menu--active')
-          });
-            
-        },
-        eventAfterRender(event) {
-          console.log("eventafterRender!");
-           if(event.fromSelect){
-                alert("Created!")
-            }
-        },
-        eventClick: function(event, jsEvent, view){
-          var data = event.start.format("YYYY-MM-DD");
-          var dia = event.start.format("dddd");
-          console.log(data, dia);
-          console.log('Event: ' + view.title);
-          console.log('Coordinates: ' + jsEvent.pageX + ',' + jsEvent.pageY);
-          console.log('View: ' + view.name);
-        },
-        select(start, end, jsEvent, view) {
-          var data = start.format("YYYY-MM-DD");
-          var dia = start.format("dddd");
-
-          console.log("select!");
-          console.log(data);
-          console.log(dia);
-          console.log(jsEvent);
-          console.log(view);
-        },
-        selectAllow() {
-          console.log("selectAllow!");
-        },
-        selectable() {
-          console.log("selectable!");
         }
-      }
-    };
-  },
-  mounted() {
-    const me = this;
+      };
 
-    $('#calendar:not("td.fc-widget-content")').on('contextmenu' , function(e){ 
-      e.preventDefault() 
-      if(e.button==2){ }
-    })
-  },
-  methods: {
-    hideContextMenu () {
-        document.getElementById("vue-simple-context-menu").classList.remove('vue-simple-context-menu--active');
+      this.selfEL.on("dblclick", function(event) {
+        event.preventDefault();
+        if (!me.modalStatus) {
+          $("#add-event-modal").modal({backdrop: 'static', keyboard: false});
+        }
+      });
+
+      this.selfEL.on("contextmenu", function(e) {
+        e.preventDefault();
+        if (e.button == 2) {
+        }
+      });
+
+      this.selfEL.fullCalendar(args);
     },
-    handleClick(event, item) {
-      this.$refs.vueSimpleContextMenu.showMenu(event, item);
+    createButtonEL() {
+      var divCreate = document.createElement("DIV");
+      var btnCreate = document.createElement("BUTTON");
+      btnCreate.setAttribute("data-toggle", "modal");
+      // btnCreate.setAttribute("data-target", "#add-event-modal");
+      btnCreate.classList = "btn btn-warning";
+      btnCreate.textContent = "Create New";
+      btnCreate.addEventListener("click", function(e) {
+        $("#add-event-modal").modal({backdrop: 'static', keyboard: false});
+      });
+      divCreate.appendChild(btnCreate);
+      document.getElementsByClassName("fc-right")[0].appendChild(divCreate);
     },
-    optionClicked(event) {
-      console.log(JSON.stringify(event));
+    onSave(e) {
+      console.log(this.$refs.txtAdd.value);
+    },
+    closeModal() {
+      this.$emit("modalStatus", false);
     }
   },
-  components: {
-    VueContext
-  }
+  components: {}
 };
 </script>
 
 <style scoped>
 .modal-header {
-  border-bottom: 1px solid yellow;
+  border-bottom: 1px solid #ccc;
 }
-.custom-menu {
-  display: none;
-  z-index: 1000;
-  position: absolute;
-  overflow: hidden;
-  border: 1px solid #CCC;
-  white-space: nowrap;
-  font-family: sans-serif;
-  background: #FFF;
-  color: #333;
-  border-radius: 5px;
-  padding: 0;
+.modal-body {
+  overflow-y: auto;
 }
 
-.custom-menu li {
-  padding: 8px 12px;
-  cursor: pointer;
-  list-style-type: none;
-  transition: all .3s ease;
-}
-
-.custom-menu li:hover {
-  background-color: #DEF;
-}
 </style>
-
