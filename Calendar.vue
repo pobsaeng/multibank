@@ -1,0 +1,263 @@
+<template>
+<div>
+  <div class="row">
+    <div class="col-md-8">
+
+      <div id="add-holiday-modal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="box-header with-border">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true" @click="closeModal">×</span><span class="sr-only">close</span></button>
+                    <h4 class="modal-title">Add a Holiday</h4>
+                </div>
+                <div class="modal-body">
+                  <div class="form-group">
+                    <label>Enter name</label>
+                    <input ref="txtAdd" type="text" class="form-control" placeholder=""/>
+                  </div>
+
+                <div class="form-group">
+                  <label>Date:</label>
+                  <div class="input-group date">
+                    <div class="input-group-addon">
+                      <i class="fa fa-calendar"></i>
+                    </div>
+                      <date-picker calendar-class="datepicker" v-model="options.date" class="form-control" :config="options.normal" @dp-change="listenToChangeEvent"></date-picker>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="closeModal">Close</button>
+                  <button type="button" class="btn btn-warning" @click="onSave" data-dismiss="modal">Save</button>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <div id="add-remove-modal" class="modal fade">
+          <div class="modal-dialog">
+              <div class="modal-content">
+                  <div class="box-header with-border">
+                      <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true" @click="closeModal">×</span><span class="sr-only" @click="closeModal">close</span></button>
+                      <h4 class="modal-title">Delete Holiday</h4>
+                  </div>
+                  <div id="modalBody" class="modal-body">
+                    <div>Are you sure you want to remove this item?</div>
+                      <div>Holiday: <span id="title"></span></div>
+                  </div>
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-default" @click="closeModal" data-dismiss="modal">No</button>
+                      <button class="btn btn-danger" @click="onDelete" data-dismiss="modal">Yes</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+      </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <span id="calendar"></span>
+    </div>
+  </div>
+</div>
+</template>
+
+<script>
+import $ from "jquery";
+import moment from "moment";
+import datePicker from "./datetimepicker/index";
+import "pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css";
+
+export default {
+  name: "hello",
+  data() {
+    return {
+      options: {
+        date: new Date(),
+        normal: {
+          format: "YYYY/MM/DD"
+        }
+      },
+      selfEL: {},
+      MODAL_STATUS: false,
+      dateClicked: "",
+      event_id: ''
+    };
+  },
+  mounted() {
+    var me = this;
+    this.selfEL = $(me.$el);
+
+    me.$on("MODAL_STATUS", function(bool) {
+      me.MODAL_STATUS = bool;
+    });
+    me.$on("REMOVE_EVENT_ID", function(event_id) {
+      me.event_id = event_id;
+    });
+    me.$on("DATE_DAY_CLICKED", function(date) {
+      me.dateClicked = date;
+      console.log(me.dateClicked.format("YYYY-MM-DD"));
+    });
+
+    me.$nextTick(function() {
+      me.createButtonEL();
+    });
+
+    me.createCalendar();
+  },
+  methods: {
+    createCalendar() {
+      var me = this;
+      var args = {
+        header: {
+          left: "prev,next today",
+          center: "title",
+          right: ""
+          // right: "month,agendaWeek,agendaDay"
+        },
+        locale: "en",
+        displayEventTime: false,
+        defaultView: "month",
+        editable: false,
+        droppable: false,
+        events(start, end, timezone, callback) {
+          callback([
+            {
+              title: "Hotmail",
+              start: moment().add(2),
+              end: moment().add(2)
+            }
+          ]);
+        },
+        dayClick: function(date, allDay, jsEvent, view) {
+          me.$emit("DATE_DAY_CLICKED", date);
+        },
+        dayRender: function(date, element, view) {
+          console.log("dayRender!");
+        },
+        eventClick: function(calEvent, jsEvent, view) {
+          var data = calEvent.start.format("YYYY/MM/DD");
+          var dia = calEvent.start.format("dddd");
+          console.log(data, dia);
+
+          $("#calendar").fullCalendar("removeEvents", calEvent._id, true);
+        },
+        eventRender: function(event, element) {
+          console.log("eventRender!");
+          //This task is do while runtime
+
+          // element.append("<span class='fa fa-times fa-2x'>X</span>");
+
+          var divClose = document.createElement("SPAN");
+          divClose.classList = "close fa fa-times fc-day-grid-event fc-start";
+          // divClose.textContent = "x";
+          divClose.style = "color:red;";
+          element.find(".fc-content")[0].appendChild(divClose);
+
+          element.find(".close").click(function() {
+            // me.selfEL.fullCalendar('removeEventSources');
+            // me.onDelete(event._id);
+            me.$emit("REMOVE_EVENT_ID", event._id);
+            $("#add-remove-modal").modal({ backdrop: "static", keyboard: false});
+            // me.selfEL.fullCalendar("removeEvents", event._id);
+          });
+
+          element.bind("dblclick", function(e) {
+            me.$emit("MODAL_STATUS", true);
+
+            $("#title").html(event.title);
+            // $("#startTime").html(moment(event.start).format("MMM Do h:mm A"));
+            // $("#endTime").html(moment(event.end).format("MMM Do h:mm A"));
+            // $("#eventInfo").html(event.description);
+            // $("#eventLink").attr("href", event.url);
+            $("#add-remove-modal").modal({ backdrop: "static", keyboard: false });
+          });
+        }
+      };
+
+      // this.selfEL.on("dblclick", function(event) {
+      //   var now = moment(event.timeStamp).format("DD-MM-YYYY HH:mm:ss");
+      //   var day = moment(event.timeStamp);
+
+      //   const date = new Date(event.timeStamp).toDateString();
+      //   var s = new Date(event.timeStamp).toLocaleDateString("en-US");
+      //   console.log(s);
+      //   console.log(day);
+
+      //   event.preventDefault();
+      //   if (!me.MODAL_STATUS) {
+      //     $("#add-holiday-modal").modal({ backdrop: "static", keyboard: false });
+      //   }
+      // });
+
+      // this.selfEL.on("contextmenu", function(e) {
+      //   e.preventDefault();
+      //   if (e.button == 2) {
+      //   }
+      // });
+
+      this.selfEL.fullCalendar(args);
+    },
+    createButtonEL() {
+      var divCreate = document.createElement("DIV");
+      var btnCreate = document.createElement("BUTTON");
+      btnCreate.setAttribute("data-toggle", "modal");
+      // btnCreate.setAttribute("data-target", "#add-holiday-modal");
+      btnCreate.classList = "btn btn-warning";
+      btnCreate.textContent = "Create New";
+      btnCreate.addEventListener("click", function(e) {
+        $("#add-holiday-modal").modal({ backdrop: "static", keyboard: false });
+      });
+      divCreate.appendChild(btnCreate);
+      document.getElementsByClassName("fc-right")[0].appendChild(divCreate);
+    },
+    onSave(e) {
+      // var date = new Date();
+      const eventName = this.$refs.txtAdd.value;
+
+      if (eventName) {
+        const eventData = {
+          title: eventName,
+          start: moment(this.options.date, ["MM-DD-YYYY", "YYYY-MM-DD"]),
+          // className: "test-class",
+          // backgroundColor: '#0073b7',
+          // borderColor    : '#0073b7'
+        };
+        this.selfEL.fullCalendar("renderEvent", eventData, true);
+      }
+      this.selfEL.fullCalendar("unselect");
+    },
+    onDelete() {
+      this.selfEL.fullCalendar("removeEvents", this.event_id);
+    },
+    closeModal() {
+      this.$emit("MODAL_STATUS", false);
+    },
+    listenToChangeEvent(...args) {
+      // console.log(...args);
+      console.log(this.options.date);
+    }
+  },
+  components: { datePicker }
+};
+</script>
+
+<style scoped>
+.modal-header {
+  /* border-bottom: 1px solid #ccc; */
+}
+/* .modal-body {
+  overflow-y: auto;
+} */
+/* .close {
+  position: absolute;
+  float: right;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  color: red;
+  text-shadow: 0 1px 0 red !important;
+  opacity: 5;
+} */
+</style>
