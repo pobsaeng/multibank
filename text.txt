@@ -19,3 +19,12 @@
 	<a v-on:click="onRegister" href="#">Create an Account</a>
   </div>
 </form>
+
+const me = this;
+me.$validator.validateAll().then((result) => {
+console.log('result: ' + result);
+if (result) {
+  me.doLogin();
+  return;
+}
+});
