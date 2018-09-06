@@ -1,0 +1,21 @@
+<form @submit.prevent="loginSubmit" novalidate>
+  <div :class="{'form-group': true, 'has-error': errors.has('email') }">
+	<label>E-Mail Address</label>
+	<input type="email" v-validate="'required'" :class="{ 'input form-control': true }" name="email" value="pobsaeng@gmail.com"
+	  ref="email" placeholder="Email" required="" />
+	<p class="text-danger" v-if="errors.has('email')">{{ errors.first('email') }}</p>
+  </div>
+  <div :class="{'form-group': true, 'has-error': errors.has('password') }">
+	<label>Password</label>
+	<input type="text" v-validate="'required'" :class="{'input form-control': true }" value="" name="password" ref="password"
+	/>
+	<p class="text-danger" v-if="errors.has('password')">{{ errors.first('password') }}</p>
+  </div>
+  <div>
+	<button :disabled="errors.any()" class="btn btn-primary btn-block">Add</button>
+  </div>
+
+  <div class="mt-3 text-left">
+	<a v-on:click="onRegister" href="#">Create an Account</a>
+  </div>
+</form>
