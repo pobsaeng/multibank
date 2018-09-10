@@ -1,24 +1,27 @@
 <template>
 <div>
 
-<div id="listbox-modal" class="modal fade">
+<div id="listbox-modal" class="modal fade modal-wide">
   <div class="modal-dialog">
       <div class="modal-content">
         <div class="row">
           <div class="col-md-12">
 
-          <div class="box-header with-border">
-            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true" @click="closeModal">×</span><span class="sr-only" @click="closeModal">close</span></button>
-            <h4 class="modal-title">Create New User</h4>
+          <div class="box-header with-background">
+            <button type="button" class="close" data-dismiss="modal">
+              <span aria-hidden="true">
+                <i class="fa fa-times" style="color:#424242;" aria-hidden="true"></i>
+              </span>
+            </button>
+            <h4 class="modal-title ">Create New User</h4>
           </div>
           <div id="modalBody" class="modal-body">
             <div class="row">
               <div class="col-md-12">
 
                 <form class="form-horizontal" novalidate>
-
                   <div class="form-group">
-                    <label class="control-label col-sm-3">User name</label>
+                    <label class="control-label col-sm-3">Username: </label>
                     <div class="col-md-9">
                       <input type="text" 
                         v-model="UserModel.username"
@@ -30,7 +33,7 @@
                   </div>
 
                   <div class="form-group">
-                    <label class="control-label col-sm-3">Password:</label>
+                    <label class="control-label col-sm-3">Password: </label>
                     <div class="col-md-9">
                       <input type="password"
                         v-model="UserModel.password"
@@ -41,7 +44,7 @@
                     </div>
                   </div>
                   <div class="form-group">
-                    <label class="control-label col-sm-3">Re-type</label>
+                    <label class="control-label col-sm-3">Re-type: </label>
                     <div class="col-md-9">
                       <input type="password"
                         v-model="UserModel.password_retype"
@@ -52,7 +55,7 @@
                     </div>
                   </div>
                   <div class="form-group">
-                    <label class="control-label col-sm-3">Full Name</label>
+                    <label class="control-label col-sm-3">Full Name: </label>
                     <div class="col-md-9">
                       <input type="text"
                         v-model="UserModel.fullname"
@@ -63,7 +66,7 @@
                     </div>
                   </div>
                   <div class="form-group">
-                    <label class="control-label col-sm-3">Email Addres</label>
+                    <label class="control-label col-sm-3">Email Address: </label>
                     <div class="col-md-9">
                       <input type="email" 
                         v-model="UserModel.email"
@@ -80,41 +83,52 @@
             
             <div class="row">
               <div class="col-md-6">
-                <label class="control-label">Groups</label>
-                <div id="vueapp" class="vue-app">
-                  <kendo-listbox id="optional"
-                        :data-source=dsMenuItems
-                        :data-text-field="'text'"
-                        :data-value-field="'id'"                
-                        :draggable="true"
-                        :connect-with="'selected'"
-                        :drop-sources="['selected']"
-                        :toolbar-tools="['transferTo', 'transferFrom', 'transferAllTo', 'transferAllFrom']"
-                        style="width:100%; height:250px;">
-                  </kendo-listbox>
+                <div class="form-group">
+                  <label class="control-label">Groups</label>
+                  <div id="vueapp" class="vue-app">
+                    <kendo-listbox id="items"
+                      @change="onChange"
+                      :reorder="onReorder"
+                      :data-source=dsMenuItems
+                      :data-text-field="'text'"
+                      :data-value-field="'id'"
+                      :navigatable="true"              
+                      :draggable="true"
+                      :connect-with="'selected'"
+                      :drop-sources="['selected']"
+                      :toolbar-tools="['transferTo', 'transferFrom', 'transferAllTo', 'transferAllFrom']"
+                      style="min-width: 260px; width:100%;">
+                    </kendo-listbox>
+                  </div>
                 </div>
               </div>
               <div class="col-md-6">
-                <label class="control-label"></label>
-                <div id="vueapp" class="">
-                  <kendo-listbox id="selected"
+                <div class="form-group">
+                  <label class="control-label"></label>
+                  <div id="vueapp" class="vue-app">
+                    <kendo-listbox id="selected"
+                        :value="modelValue"
                         :draggable="true"
                         :connect-with="'optional'"
                         :drop-sources="['optional']"
-                        style="width:100%; height:250px;"
+                        style="width:100%;"
                         name="listboxSelected">
-                  </kendo-listbox>
+                    </kendo-listbox>
+                  </div>
                 </div>
               </div>
-
               <p class="text-danger" v-if="errors.has('listboxSelected')">{{ errors.first('listboxSelected') }}</p>
             </div>
           </div>
           <div class="modal-footer">
-            <div class="control-group">
-              <button class="btn btn-warning" @click="closeModal" data-dismiss="modal">Cancel</button>
-              <button class="btn btn-primary" @click="onSave">Save</button>
-            </div>   
+            <!--data-dismiss="modal"-->
+            <!-- <button class="btn btn-default" @click="onReset">Reset</button> 
+            <button class="btn btn-default btn-lg" @click="onSave">Save</button> -->
+             <div class="form-group pull-right">
+              <button type="button" class="btn btn-default" @click="onReset"><i class="fa fa-window-restore"></i> Reset</button>
+              <button type="button" class="btn btn-primary" @click="onSave"><i class="fa fa-floppy-o"></i> Save</button>
+            </div>
+            
           </div>
 
           </div>
@@ -126,7 +140,7 @@
 
 <div class="row">      
   <div class="col-md-12">
-    <div class="box">
+    <div class="box box-krungsri">
       <div class="box-header with-border">
         <h3 class="box-title">User Management</h3>
       </div>
@@ -214,6 +228,7 @@ export default {
   name: "usermanagement",
   data() {
     return {
+      model: { id: "1", text: "User Management", value: "10" },
       UserModel: UserModel,
       dsMenuItems: [
         { id: "1", text: "User Management", value: "10" },
@@ -230,22 +245,32 @@ export default {
     };
   },
   mounted() {
-    // $(function() {
-    //   $("#example1").DataTable();
-    //   $("#example2").DataTable({
-    //     paging: true,
-    //     lengthChange: false,
-    //     searching: false,
-    //     ordering: true,
-    //     info: true,
-    //     autoWidth: false
-    //   });
-    // });
+
+  },
+  computed: {
+      modelValue: function () {
+          return this.model.value;
+      }
   },
   methods: {
+    onReorder(ev){
+      console.log(ev);
+    },
+    onChange(ev){
+      // var selectedIndex = ev.sender.select();
+      // var selectedItem = ev.sender.dataItem(selectedIndex).toJSON();
+      // this.model = selectedItem;
+      // console.log(this.model);
+      // console.log(this.modelValue);
+      // var listBox = $("#selected").data("kendoListBox");
+      // var items = listBox.dataSource._data;
+      // for(var item of items){
+      //   console.log(item.id, item.text, item.value)
+      // }
+      $("#selected").data("kendoListBox").clearSelection();
+    },
     onShowListBox() {
-      $("#listbox-modal")
-        .modal({
+      $("#listbox-modal").modal({
           backdrop: "static",
           keyboard: false
         })
@@ -253,29 +278,86 @@ export default {
           width: "auto",
           heigh: "auto"
         })
-        .on("show.bs.modal", function() {
-          var height = $(window).height() - 200;
-          $(this)
-            .find(".modal-body")
-            .css("max-height", height);
-        });
+        // .on("show.bs.modal", function() {
+        //   var height = $(window).height() - 200;
+        //   $(this)
+        //     .find(".modal-body")
+        //     .css("max-height", height);
+            
+        // });
+
+        this.resetForm({});
     },
     onSave() {
       const me = this;
+      var listBox = $("#selected").data("kendoListBox");
+      var items = listBox.dataSource._data;
+      const list = [];
+      for(var item of items){
+        list.push({id: item.id, text: item.text, value: item.value});
+      }
+      this.UserModel.menu_items = list;
+      // console.log(list);
+      // me.$validator.fields.items.forEach( each => {
+      //   console.log(each.el.name, each.el.value);
+      // })
+
       me.$validator.validateAll().then((result) => {
-        console.log('result: ' + result);
         if (result) {
           console.log(this.UserModel);
-          
+          console.log(this.UserModel.menu_items);
           return;
         }
       });
     },
-    closeModal() {}
+    resetForm(UserForm) {
+      this.$validator.reset();
+
+      Object.keys(UserForm).forEach(function(key, index) {
+        UserForm[key] = '';
+      });
+    },
+    resetListBox(){
+      var listSelected = $("#selected").data("kendoListBox");
+      listSelected.remove(listSelected.items());
+
+      var listItems = $("#items").data("kendoListBox");
+      listItems.remove(listItems.items());
+      listItems.dataSource.data(this.dsMenuItems);
+
+      $("#items").data("kendoListBox").clearSelection();
+      $("#selected").data("kendoListBox").clearSelection();
+    },
+    onReset() {
+      this.resetForm(this.UserModel); 
+      this.resetListBox();
+    }
   }
 };
 </script>
 <style scoped>
+
+.modal-body {
+  padding: 20px;
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+}
+/* .modal-footer {
+  margin-top: 16px;
+  padding: 10px;
+  text-align: right;
+  border-top: 1px solid #e5e5e5;
+} */
+@media (min-width: 768px){
+  .modal-dialog {
+      width: 590px;
+      margin: 30px auto;
+  }
+}
+.modal-wide .modal-dialog {
+  min-width: 30%;
+}
+
 .top-buffer {
   margin-top: 10px;
 }
@@ -289,7 +371,7 @@ label {
   height: 5px;
 }
 .has-error {
-  border-color: #dd4b39;
-  box-shadow: none;
+  border-color: none;
+  /*box-shadow: none;*/
 }
 </style>
