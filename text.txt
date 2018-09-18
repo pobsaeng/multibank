@@ -1,132 +1,170 @@
-.navbar-brand {
-  margin-right: 0rem;
-}
-.navbar-brand img {
-  width: 90px !important;
-  height: 130px !important;
-  margin-left: 50px;
-  position: absolute;
-  z-index: 999999;
-}
-.navbar-bg-color {
-  background-color: #3c8dbc !important;
-}
+package com.multibank.controller;
 
-.sidebar-menu {
-  margin-top: 5px;
-}
-.box-body {
-  color: black;
-}
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-/* Management Modal Rounded Style */
-.box-header.with-background {
-  color: #fff;
-  height: 43px;
-  /* background-color: #2e6da4 !important;*/
-  /* background-color: #286090 !important;*/
-  /* background-color: #269abc !important; */
-  background-color: #387fa9 !important;
-  border-top-left-radius: 3px !important;
-  border-top-right-radius: 3px !important;
-}
-.modal-content {
-  border-radius: 3px !important;
-  -webkit-border-radius: 5px !important;
-  -moz-border-radius: 5px !important;
-}
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-/* Calendar Style*/
-.fc-view-container {
-  border-bottom: none;
-  border-left: 1px solid #e6e6e6;
-  border-right: 1px solid #e6e6e6;
-  padding: 0px;
-  margin: 0px;
-}
-.fc-toolbar {
-  padding: 0px;
-  margin: 0;
-}
-.fc-toolbar.fc-header-toolbar {
-  margin-bottom: 0.5em;
-}
-.fc-view-container {
-  color: black;
-  padding: 0px !important;
-}
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-/* .close {
-  float: right;
-  font-size: 21px;
-  font-weight: 700;
-  line-height: 1;
-  color: #fff !important;
-  text-shadow: 0 1px 0 #fff;
-  filter: alpha(opacity=20);
-  opacity: 1.2 !important;
-} */
+import com.multibank.baseconfig.JwtTokenProvider;
+import com.multibank.domain.entity.Items;
+import com.multibank.domain.entity.ListItems;
+import com.multibank.domain.entity.Role;
+import com.multibank.domain.entity.RoleName;
+import com.multibank.domain.entity.User;
+import com.multibank.domain.entity.UserItems;
+import com.multibank.exception.APIException;
+import com.multibank.exception.AppException;
+import com.multibank.model.json.request.LoginRequest;
+import com.multibank.model.json.request.SignUpRequest;
+import com.multibank.model.json.response.JwtAuthenResponse;
+import com.multibank.repository.ItemsRepository;
+import com.multibank.repository.RoleRepository;
+import com.multibank.repository.UserItemsRepository;
+import com.multibank.repository.UserRepository;
 
-.box {
-  border-top-color: #a4a5ae;
-}
-.box.box-krungsri {
-  border-top-color: #9a9a9a;
-}
-.box.box-krungsri-sky {
-  border-top-color: #00c0ef;
-}
-.box.box-krungsri-red {
-  border-top-color: #dd4b39;
-}
-.box.box-krungsri-yellow {
-  border-top-color: #f39c12;
-}
-.box.box-krungsri-green {
-  border-top-color: #00a65a;
-}
+@RestController
+@RequestMapping("/api/auth")
+public class AuthController {
 
-.control-label {
-  line-height: 1.15;
-  padding-top: 7px;
-  margin-bottom: 0;
-  text-align: left !important;
+	@Autowired
+	AuthenticationManager authenticationManager;
+
+	@Autowired
+	UserRepository userRepository;
+	
+	@Autowired
+	UserItemsRepository userItemsRepository;
+	
+	@Autowired
+	ItemsRepository itemsRepository;
+
+	@Autowired
+	RoleRepository roleRepository;
+
+	@Autowired
+	PasswordEncoder passwordEncoder;
+
+	@Autowired
+	JwtTokenProvider tokenProvider;
+	
+	@PostMapping("/signin")
+	public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest, HttpServletRequest request) throws APIException{
+		System.out.println("--------AuthController[signin]------------");
+		if(loginRequest.getUsername().equals("")) {
+			throw new APIException(
+					"Usernae is require!",
+					HttpServletResponse.SC_UNAUTHORIZED,
+					HttpStatus.BAD_REQUEST.value(),
+					request.getServletPath(),
+					new Timestamp(System.currentTimeMillis())
+					);
+			
+		}else if(loginRequest.getPassword().equals("")) {
+			throw new APIException(
+					"Password is require!",
+					HttpServletResponse.SC_UNAUTHORIZED,
+					HttpStatus.BAD_REQUEST.value(),
+					request.getServletPath(),
+					new Timestamp(System.currentTimeMillis())
+					);
+		}
+		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		String jwt = tokenProvider.generateToken(authentication);
+		System.out.println("[jwt: " + tokenProvider.getUserIdFromJWT(jwt) + "]");
+		return ResponseEntity.ok(new JwtAuthenResponse(jwt));
+	}
+	@PostMapping("/signup")
+	public ResponseEntity<?> registerUser(@RequestBody SignUpRequest signUpRequest) {
+		System.out.println("+--------signup--------+");
+
+		User user = new User();
+		user.setId(signUpRequest.getUser_id());
+		user.setFullname(signUpRequest.getFullname());
+		user.setEmail(signUpRequest.getEmail());
+		user.setUsername(signUpRequest.getUsername());
+		user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+		user.setUpdated_date(null);
+		user.setCreated_date(null);
+		
+		Role userRole = roleRepository.findByName(RoleName.ROLE_USER).orElseThrow(() -> new AppException("User Role not set."));
+		user.setRoles(Collections.singleton(userRole));
+		User sUser = userRepository.save(user);
+		
+		UserItems userItems = new UserItems();
+		userItems.setUser_id(sUser.getId());
+		UserItems uitems = userItemsRepository.save(userItems);
+		
+		List<ListItems> listItems = signUpRequest.getItems();
+		for (ListItems ls : listItems) {
+			Items items = new Items();
+			items.setUser_item_id(uitems.getUser_item_id());
+			items.setItem_name(ls.getItem_name());
+			items.setId(ls.getId());
+			itemsRepository.save(items);
+		}
+
+		return ResponseEntity.ok(signUpRequest);
+	}
+	@GetMapping("/findall")
+    public ResponseEntity<?> getFindAll() {
+		List<User> users = userRepository.findAll();
+		Map<String, Object> baseMap = new HashMap<>();
+		Map<String, Object> mobj = new HashMap<>();
+		Map<String, Object> map = null;
+		List<Map<String, Object>> lsItems = null;
+
+		for (int i = 0; i < users.size(); i++) {
+			lsItems = new ArrayList<>();
+
+			map = new HashMap<>();
+			map.put("data", users.get(i));
+
+			UserItems userItems = userItemsRepository.findUserById(users.get(i).getId());
+			map.put("menu", itemsRepository.findUserItemById(userItems.getUser_item_id()));
+
+			mobj.put("user" + i, map);
+			lsItems.add(mobj);
+		}
+		baseMap.put("result", lsItems);
+    	
+		return new ResponseEntity(baseMap, HttpStatus.OK);
+    }
+	@GetMapping("/finbyuser/{user_id}")
+    public ResponseEntity<?> getFinByUser(@PathVariable("user_id") Integer user_id) {
+		System.out.println("user_id: " + user_id);
+		Map<String, Object> mResult = new HashMap<>();
+		Map<String, Object> map = new HashMap<>();
+		
+    	Optional<User> users = userRepository.findById(user_id);
+    	UserItems userItems = userItemsRepository.findUserById(users.get().getId());
+    	List<Items> listItems = itemsRepository.findUserItemById(userItems.getUser_item_id());
+    	map.put("users", users);
+    	map.put("Items", listItems);
+    	
+    	mResult.put("results", map);
+		return new ResponseEntity(mResult, HttpStatus.OK);
+    }
 }
-
-.k-listbox-toolbar {
-  height: 200px;
-}
-
-/* Setting Kendo UI */
-@media (max-width: 767px) {
-  .form-group.k-listbox.k-listbox-toolbar-right .k-listbox-toolbar {
-  }
-}
-@media (min-width: 768px) {
-  .k-listbox.k-listbox-toolbar-right .k-listbox-toolbar {
-    margin-left: 8px;
-    margin-right: 0px;
-    width: 20px;
-  }
-}
-.k-listbox .k-list-scroller {
-  border-radius: 3px !important;
-  -webkit-border-radius: 3px !important;
-  -moz-border-radius: 3px !important;
-
-
-}
-/* .k-listbox .k-list-scroller {
-  border-radius: 3px !important;
-  background-color: #fff;
-  border-color: rgba(0,0,0,.08);
-  color: #656565;
-  background-clip: padding-box;
-} */
-
-/* .k-list-optionlabel:hover.k-state-selected,
-.k-list .k-item.k-state-hover.k-state-selected,
-.k-list .k-item:hover.k-state-selected {
-  background-color: blue;
-} */
-
