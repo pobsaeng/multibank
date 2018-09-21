@@ -1,0 +1,51 @@
+SELECT concat('My', NULL, 'QL');-- null
+SELECT concat('My', 'S', 'QL');-- MySQL
+
+SELECT LEFT('Kraipob', 4);-- Krai
+SELECT MID('Saengkhunthod', 6,4);-- khun
+SELECT RIGHT('Kraipob', 3);-- pob
+
+SELECT FORMAT(12332.123456, 2);-- 12,332.12
+SELECT INSERT('Saengkhunthod', 1, 0, 'Mr.');-- Mr.Saengkhunthod (1 = insert index, 0 = replace old value)
+
+SET @str1 = BINARY 'New York';
+SET @str2 = 'new york';
+SELECT @str1  LIKE @str2; -- 0
+
+SELECT SUBSTRING('Saengkhunthod',6);-- khunthod
+SELECT SUBSTRING('Saengkhunthod',3,3);-- eng
+SELECT SUBSTRING('Kraipob',-3); -- pob
+
+SELECT UPPER('kraipob'), LOWER('SAENGKHUNTHOD');-- KRAIPOB, saengkhunthod
+
+SELECT TRIM('  pob   ');-- pob
+SELECT TRIM(LEADING 'x' FROM 'xxxPOBaaa');--POBaaa
+SELECT TRIM(BOTH 'x' FROM 'xxxPOBxxx');-- POB
+SELECT TRIM(TRAILING 'pob' FROM 'KRAIpob'); --KRAI
+
+set @str1 := TRIM(LEADING 'Krai' FROM 'Kraipob');
+set @str2 := TRIM(TRAILING 'pob' FROM 'Kraipob');
+select @str1, @str2;-- pob, Krai
+
+select 'I\'am Pob'; --I'am Pob
+select 'Test " \'1\' " '; --Test " '1' " 
+select 'c:\\download'; --c:\download
+select 'c:\\\\download'; --c:\\download
+
+select substring_index('kraipob saengkhunthod', 'a', 1);--kr
+select substring_index('kraipob saengkhunthod', 'a', 2);--kraipobs
+select substring_index('kraipob saengkhunthod', 'a', -2);--ipob saengkhunthod
+select substring_index('kraipob saengkhunthod', ' ', 1)--kraipob
+select substring_index('kraipob saengkhunthod', ' ', -1)--saengkhunthod
+
+select title from books 
+where title regexp '^([a-z].*Tutorials)$';
+
+
+
+
+
+
+
+
+
