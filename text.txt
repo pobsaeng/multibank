@@ -1,2 +1,7 @@
-<role rolename="manager-gui,admin-gui"/>
-<user username="admin" password="admin" roles="manager-gui,admin-gui"/>
+https://netjs.blogspot.com/2017/09/java-stream-api-interview-questions.html
+https://www.journaldev.com/8697/javase8-interview-questions-part1
+https://www.tutorialspoint.com/java8/java8_interview_questions.htm
+https://www.javainuse.com/java/java8_intvw
+https://www.baeldung.com/java-8-interview-questions
+https://java2blog.com/java-8-interview-questions/
+http://www.topjavatutorial.com/java-8/java-8-lambda-expressions/
