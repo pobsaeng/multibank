@@ -5,3 +5,14 @@ https://www.javainuse.com/java/java8_intvw
 https://www.baeldung.com/java-8-interview-questions
 https://java2blog.com/java-8-interview-questions/
 http://www.topjavatutorial.com/java-8/java-8-lambda-expressions/
+
+<div class="form-group">
+  <label>Select</label>
+  <select class="form-control">
+    <option>option 1</option>
+    <option>option 2</option>
+    <option>option 3</option>
+    <option>option 4</option>
+    <option>option 5</option>
+  </select>
+</div>
