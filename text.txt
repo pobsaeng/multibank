@@ -1,18 +1,3 @@
-https://netjs.blogspot.com/2017/09/java-stream-api-interview-questions.html
-https://www.journaldev.com/8697/javase8-interview-questions-part1
-https://www.tutorialspoint.com/java8/java8_interview_questions.htm
-https://www.javainuse.com/java/java8_intvw
-https://www.baeldung.com/java-8-interview-questions
-https://java2blog.com/java-8-interview-questions/
-http://www.topjavatutorial.com/java-8/java-8-lambda-expressions/
-
-<div class="form-group">
-  <label>Select</label>
-  <select class="form-control">
-    <option>option 1</option>
-    <option>option 2</option>
-    <option>option 3</option>
-    <option>option 4</option>
-    <option>option 5</option>
-  </select>
-</div>
+https://vuejsexamples.com/bootstrap-wizard-with-vue-js/
+https://codepen.io/chrgl86/pen/NRqzww
+https://vuejsexamples.com/tag/pagination/
