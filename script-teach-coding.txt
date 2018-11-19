@@ -1,0 +1,10 @@
+Today I'm going to talk about programming languages and share you how to be a software developer.
+so before we get started, I want to ask you a couple of questions about your skills for coding.
+- Have you ever coding?
+- What skills do you have in coding?
+- What languages do you want to learn for coding?
+Coding programs consist of big 3 parts.
+First part is Input.
+Second part is Processing.
+Three part is Output
+I'm going to advise you are learning to JavaScript because JavaScript is the most popular programming language currently, it's the worth to learn

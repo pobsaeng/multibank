@@ -1,0 +1,22 @@
+What's up guys, Today, I'm going to take about JavaScript frameworks.
+It's one of the most popular JavaScript frameworks which is growing up quickly especially in 2018
+and to make it become the library that developers most want to learn in 2018.
+
+I have a few question to ask your guys.
+-Who's been using Vue.js in here before? Just raise their hand.
+-Who heard of Vue.js before but never use it? Just raise their hand.
+Alright, there's a lot more people who have heard about it but never use it. 
+
+Before we start, I just want to mention the important things of Vue.js
+What is Vue.js?
+Vue.js is a progressive web framework for building user interfaces and it's small size and faster, 
+It also can be integrated with other frameworks built on JavaScript.
+In this course, I'm going to show you exactly how you can writting Vue applications.
+At first, We have to prepare our environment before to make it.
+There are the different ways to try out Vue.js but so in this course,
+I will bring you use two ways for testing Vue applications following:
+- Using a CDN in a script tag.
+- Using Vue-cli 
+if you use CDN you can add directly include Vue via a CDN in a script tag in your project.
+who is use the Vue-CLI you have to install Vue-CLI before use it.
+(Using install Vue-CLI: go to command and open up so type "npm -g vue-cli --save" then enter it.)
